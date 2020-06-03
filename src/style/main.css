@@ -1,0 +1,30 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    background: #A3BFF9;
+}
+
+#landing-image, #landing-info{
+    height: 100vh;
+}
+
+.info-title{
+    width: 100%;
+}
+
+.info-desc{
+    width: 70%;
+    margin: auto;
+}
+
+competition-item:hover{
+    cursor: pointer;
+}
+
+@media screen and (max-width: 600px) {
+    
+}

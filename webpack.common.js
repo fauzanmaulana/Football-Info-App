@@ -1,12 +1,13 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const path = require('path')
+const ServiceWorkerWebpackPlugin = require('serviceworker-webpack-plugin')
 
 module.exports = {
     entry : {
         app : "./src/app.js"
     },
     output: {
-        path: path.resolve(__dirname, "dist"),
+        path: path.resolve(__dirname, "public"),
         filename: "bundle.js"
     },
     module : {
@@ -17,25 +18,22 @@ module.exports = {
                     {loader : "style-loader"},
                     {loader : "css-loader"}
                 ]
-            },
-            {
-                test : /\.html$/,
-                use : [
-                    {
-                        loader : 'file-loader',
-                        options : {
-                            name : '[name].[ext]'
-                        }
-                    }
-                ],
-                exclude : path.resolve(__dirname, './src/index.html')
             }
         ]
     },
     plugins: [
         new HtmlWebpackPlugin({
-            template: "./src/index.html",
+            template: "./src/template.html",
             filename: "index.html"
-        })
+        }),
+        
+        new HtmlWebpackPlugin({
+            template: "./src/pages/details.html",
+            filename: "details.html"
+        }),
+
+        new ServiceWorkerWebpackPlugin({
+            entry: path.join(__dirname, 'src/sw.js'),
+        }),
     ]
 }
