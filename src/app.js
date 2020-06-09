@@ -11,5 +11,9 @@ document.addEventListener("DOMContentLoaded", mainView)
 if ('serviceWorker' in navigator) {
     const registration = runtime.register()
 
-    registerEvents(registration)
+    registerEvents(registration, {
+        onInstalled: () => {
+            console.log('berhasil regist')
+        }
+    })
 }

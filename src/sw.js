@@ -1,65 +1,80 @@
-const DEBUG = false
-
-// When the user navigates to your site,
-// the browser tries to redownload the script file that defined the service
-// worker in the background.
-// If there is even a byte's difference in the service worker file compared
-// to what it currently has, it considers it 'new'.
 const { assets } = global.serviceWorkerOption
 
-const CACHE_NAME = new Date().toISOString()
+const CACHE_NAME = "tesv4"
 
-let assetsToCache = [...assets, './']
+let assetsToCache = [
+  // ...assets,
+  // './',
+  // '/src/pages/home.html',
+  ...assets,
+  './',
+  '/src/pages/home.html',
+  "/src/script/component/competition-list.js",
+  "/src/script/component/competition-item.js",
+  "/src/script/data/football.js",
+  "/src/assets/landing.png",
+  "/src/assets/icon.png",
+  // "/src/manifest.json",
+]
 
-assetsToCache = assetsToCache.map(path => {
-  return new URL(path, global.location).toString()
+console.log(assetsToCache)
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      console.log('ini install sw')
+      return cache.addAll(assetsToCache)
+    })
+  )
 })
 
-// When the service worker is first added to a computer.
-self.addEventListener('install', event => {
-  // Perform install steps.
-  if (DEBUG) {
-    console.log('[SW] Install event')
+self.addEventListener("fetch", function(event) {
+  const base_url = "https://api.football-data.org/"
+  if(event.request.url.indexOf(base_url) > -1){
+    event.respondWith(
+      caches.open(CACHE_NAME).then(cache => {
+        return fetch(event.request).then(response => {
+          cache.put(event.request.url, response.clone())
+          return response
+        })
+      })
+    )
+  }else{
+    event.respondWith(
+      caches.match(event.request, { ignoreSearch: true }).then(function(response) {
+          return response || fetch (event.request)
+      })
+    )
   }
+})
 
-  // Add core website files to cache during serviceworker installation.
-  event.waitUntil(
-    global.caches
-      .open(CACHE_NAME)
-      .then(cache => {
-        return cache.addAll(assetsToCache)
-      })
-      .then(() => {
-        if (DEBUG) {
-          console.log('Cached assets: main', assetsToCache)
+self.addEventListener('fetch', event => {
+  event.respondWith(
+      caches
+      .match(event.request, { cacheName : CACHE_NAME })
+      .then(response => {
+          if (response) {
+          console.log("ServiceWorker: Gunakan aset dari cache: ", response.url);
+          return response;
         }
-      })
-      .catch(error => {
-        console.error(error)
-        throw error
+ 
+        console.log("ServiceWorker: Memuat aset dari server: ", event.request.url);
+        return fetch(event.request);
       })
   )
 })
 
-// After the install event.
 self.addEventListener('activate', event => {
-  if (DEBUG) {
-    console.log('[SW] Activate event')
-  }
-
-  // Clean the caches
   event.waitUntil(
-    global.caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          // Delete the caches that are not the current one.
-          if (cacheName.indexOf(CACHE_NAME) === 0) {
-            return null
-          }
-
-          return global.caches.delete(cacheName)
-        })
-      )
-    })
+      caches.keys().then(cacheNames => {
+          return Promise.all(
+              cacheNames.map(cacheName => {
+                  if (cacheName != CACHE_NAME) {
+                      console.log("ServiceWorker: cache " + cacheName + " dihapus");
+                      return caches.delete(cacheName);
+                  }
+              })
+          )
+      })
   )
 })

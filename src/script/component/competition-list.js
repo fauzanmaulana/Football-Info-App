@@ -3,6 +3,7 @@ import "./competition-item.js"
 class CompList extends HTMLElement{
     set competitions(competitions){
         this._competitions = competitions
+        console.log(this._competitions)
         this.render();
     }
 

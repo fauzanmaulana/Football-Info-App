@@ -14,16 +14,16 @@ const main = () => {
     }
 
     const competitionsList = async () => {
-        // if('caches' in window){
-        //     caches.match('https://api.football-data.org/v2/competitions').then(response => {
-        //         if(response){
-        //             response.json().then(result => {
-        //                 const compList = document.querySelector('competition-list')
-        //                 compList.competitions = result
-        //             })
-        //         }
-        //     })
-        // }
+        if('caches' in window){
+            caches.match('https://api.football-data.org/v2/competitions').then(response => {
+                if(response){
+                    response.json().then(result => {
+                        console.log(result)
+                        renderResult(result)
+                    })
+                }
+            })
+        }
         const results = await Datafilms.competitions()
         const leagues = results.filter(league => league.id === 2001 || league.id === 2002 || league.id === 2003 || league.id === 2021 || league.id === 2014 || league.id === 2015)
         renderResult(leagues)
