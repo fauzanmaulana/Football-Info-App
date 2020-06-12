@@ -3,9 +3,6 @@ const { assets } = global.serviceWorkerOption
 const CACHE_NAME = "tesv4"
 
 let assetsToCache = [
-  // ...assets,
-  // './',
-  // '/src/pages/home.html',
   ...assets,
   './',
   '/src/pages/home.html',
@@ -14,7 +11,7 @@ let assetsToCache = [
   "/src/script/data/football.js",
   "/src/assets/landing.png",
   "/src/assets/icon.png",
-  // "/src/manifest.json",
+  "/src/manifest.json",
 ]
 
 console.log(assetsToCache)

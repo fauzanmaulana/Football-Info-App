@@ -28,8 +28,13 @@ module.exports = {
         }),
         
         new HtmlWebpackPlugin({
-            template: "./src/pages/details.html",
-            filename: "details.html"
+            template: "./src/pages/matches.html",
+            filename: "matches.html"
+        }),
+
+        new HtmlWebpackPlugin({
+            template: "./src/pages/standings.html",
+            filename: "standings.html"
         }),
 
         new ServiceWorkerWebpackPlugin({
