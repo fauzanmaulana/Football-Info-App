@@ -35,11 +35,13 @@ const main = () => {
     const matchesLists = async id => {
         const results = await ballData.matches(id)
         const matches = results.matches
-        console.log(matches)
+        const navBar = document.querySelector('nav-bar')
+        navBar.leagueName = results.competition.name
         renderResultListMatch(matches)
         const tabLink = document.querySelectorAll('.tab-link')
-        document.querySelector('.btn-home').addEventListener('click', e => {
-            let page = e.target.parentNode.getAttribute("href").substr(1)
+        const backBtn = document.querySelector('.btn-home')
+        backBtn.addEventListener('click', function(){
+            let page = this.getAttribute('href').substr(1)
             competitionsList()
             pageLoaded(page)
         })
@@ -55,10 +57,13 @@ const main = () => {
 
     const standingsList = async id => {
         const results = await ballData.standings(id)
+        const navBar = document.querySelector('nav-bar')
+        navBar.leagueName = results.competition.name
         renderResultListStandings(results.standings[0].table)
         const tabLink = document.querySelectorAll('.tab-link')
-        document.querySelector('.btn-home').addEventListener('click', e => {
-            let page = e.target.parentNode.getAttribute("href").substr(1)
+        const backBtn = document.querySelector('.btn-home')
+        backBtn.addEventListener('click', function(){
+            let page = this.getAttribute('href').substr(1)
             competitionsList()
             pageLoaded(page)
         })
@@ -92,105 +97,112 @@ const main = () => {
     }
 
     const renderResultListStandings = results => {
-        let component = ''
-        results.forEach(result => {
-            console.log(result)
-            component += `
-                <div class="card-panel blue lighten-2 white-text">
-                    <div class="row">
-                        <div class="container">
-                            <div class="col s12">
-                                <div class="team-standings" style="display: flex; align-items: center; justify-content: space-between;">
-                                    <img src="${result.team.crestUrl}" alt="team" width="40">
-                                    <h6><b>${result.team.name}</b></h6>
+        if(results.length > 0){
+            let component = ''
+            results.forEach(result => {
+                console.log(result)
+                component += `
+                    <div class="card-panel blue lighten-2 white-text">
+                        <div class="row">
+                            <div class="container">
+                                <div class="col s12">
+                                    <div class="team-standings" style="display: flex; align-items: center; justify-content: space-between;">
+                                        <img src="${result.team.crestUrl}" alt="team" width="40">
+                                        <h6><b>${result.team.name}</b></h6>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        <div class="row center-align">
+                            <div class="col s2">
+                                <p>M</p>
+                            </div>
+                            <div class="col s2">
+                                <p>M</p>
+                            </div>
+                            <div class="col s2">
+                                <p>S</p>
+                            </div>
+                            <div class="col s2">
+                                <p>K</p>
+                            </div>
+                            <div class="col s2">
+                                <p>GM</p>
+                            </div>
+                            <div class="col s2">
+                                <p>POINT</p>
+                            </div>
+                        </div>
+                        <div class="row center-align">
+                            <div class="col s2">
+                                <p>${result.playedGames}</p>
+                            </div>
+                            <div class="col s2">
+                                <p>${result.won}</p>
+                            </div>
+                            <div class="col s2">
+                                <p>${result.lost}</p>
+                            </div>
+                            <div class="col s2">
+                                <p>${result.draw}</p>
+                            </div>
+                            <div class="col s2">
+                                <p>${result.goalsFor}</p>
+                            </div>
+                            <div class="col s2">
+                                <p>${result.points}</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="row center-align">
-                        <div class="col s2">
-                            <p>M</p>
-                        </div>
-                        <div class="col s2">
-                            <p>M</p>
-                        </div>
-                        <div class="col s2">
-                            <p>S</p>
-                        </div>
-                        <div class="col s2">
-                            <p>K</p>
-                        </div>
-                        <div class="col s2">
-                            <p>GM</p>
-                        </div>
-                        <div class="col s2">
-                            <p>POINT</p>
-                        </div>
-                    </div>
-                    <div class="row center-align">
-                        <div class="col s2">
-                            <p>${result.playedGames}</p>
-                        </div>
-                        <div class="col s2">
-                            <p>${result.won}</p>
-                        </div>
-                        <div class="col s2">
-                            <p>${result.lost}</p>
-                        </div>
-                        <div class="col s2">
-                            <p>${result.draw}</p>
-                        </div>
-                        <div class="col s2">
-                            <p>${result.goalsFor}</p>
-                        </div>
-                        <div class="col s2">
-                            <p>${result.points}</p>
-                        </div>
-                    </div>
-                </div>
-            `
-            document.querySelector('.standings-list').innerHTML = component
-        })
+                `
+                document.querySelector('.standings-list').innerHTML = component
+            })
+            return
+        }
+        document.querySelector('.matches-list').innerHTML = "<h3 class='center-align white-text'>no standings</h3>"
     }
 
     const renderResultListMatch = results => {
-        let component = ''
-        results.forEach(result => {
-            if(result.score.winner === null){
-                result.score.winner = 'belum tanding'
-            }
-            component += `
-                <div class="card-panel blue lighten-2 white-text">
-                    <div class="row center-align">
-                        <div class="col s4">
-                            <h6>${result.awayTeam.name}</h6>
+        if(results.length > 0){
+            let component = ''
+            results.forEach(result => {
+                if(result.score.winner === null){
+                    result.score.winner = 'belum tanding'
+                }
+                component += `
+                    <div class="card-panel blue lighten-2 white-text">
+                        <div class="row center-align">
+                            <div class="col s4">
+                                <h6>${result.awayTeam.name}</h6>
+                            </div>
+                            <div class="col s4">
+                                <h6>vs</h6>
+                            </div>
+                            <div class="col s4">
+                                <h6>${result.homeTeam.name}</h6>
+                            </div>
                         </div>
-                        <div class="col s4">
-                            <h6>vs</h6>
-                        </div>
-                        <div class="col s4">
-                            <h6>${result.homeTeam.name}</h6>
+                        <div class="row center-align" style="margin: 0;">
+                            <div class="col s4">
+                                <p>${result.score.winner}</p>
+                            </div>
+                            <div class="col s4">
+                                <p>${String(utcDateConv(result.utcDate)).substr(16, 5)}</p>
+                            </div>
+                            <div class="col s4">
+                                <p>${String(utcDateConv(result.utcDate)).substr(0,16)}</p>
+                            </div>
                         </div>
                     </div>
+                `
+                document.querySelector('.matches-list').innerHTML = component
+            });
 
-                    <div class="row center-align" style="margin: 0;">
-                        <div class="col s4">
-                            <p>${result.score.winner}</p>
-                        </div>
-                        <div class="col s4">
-                            <p>${String(utcDateConv(result.utcDate)).substr(16, 5)}</p>
-                        </div>
-                        <div class="col s4">
-                            <p>${String(utcDateConv(result.utcDate)).substr(0,16)}</p>
-                        </div>
-                    </div>
-                </div>
-            `
-            document.querySelector('.matches-list').innerHTML = component
-        });
-
-        const compItem = document.querySelectorAll('.competition-item')
-        detailComp(compItem)
+            const compItem = document.querySelectorAll('.competition-item')
+            detailComp(compItem)
+            return
+        }
+        document.querySelector('.matches-list').innerHTML = "<h3 class='center-align white-text'>no matches</h3>"
     }
 
     let page = window.location.hash.substr(1)

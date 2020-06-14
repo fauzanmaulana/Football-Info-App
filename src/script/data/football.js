@@ -27,7 +27,6 @@ class footballData {
         })
         .then(response => response.json())
     }
-
 }
 
 export default footballData;

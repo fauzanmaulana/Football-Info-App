@@ -3,7 +3,8 @@ var serviceWorkerOption = {
     "/bundle.js",
     "/index.html",
     "/matches.html",
-    "/standings.html"
+    "/standings.html",
+    "/liked.html"
   ]
 };
         
