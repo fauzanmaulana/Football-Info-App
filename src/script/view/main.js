@@ -1,5 +1,6 @@
 import "../component/competition-list.js"
 import "../component/nav-bar.js"
+import indexdb from "../../db.js"
 import ballData from "../data/football.js"
 
 const main = () => {
@@ -12,6 +13,38 @@ const main = () => {
     const pageLoaded = async url => {
         const thisPage = await loadPage(url)
         document.querySelector('#content').innerHTML = thisPage
+    }
+
+    const addLiked = async data => {
+        const dbPromise = await indexdb()
+        const tx = dbPromise.transaction('liked', 'readwrite')
+        const store = tx.objectStore('liked')
+        store.add(data)
+        return tx.complete
+    }
+
+    const getLiked = async () => {
+        const dbPromise = await indexdb()
+        const tx = dbPromise.transaction("liked", "readonly")
+        const store = tx.objectStore('liked')
+        return store.getAll()
+    }
+
+    const likedList = async () => {
+        const likeds = await getLiked()
+        const likedComponent = document.querySelector('.list-liked')
+        if(likeds.length > 0){
+            let component = ''
+            likeds.forEach(result => {
+                let info = result.slice(-1)[0] 
+                component += `
+                    <a href="#matches"><p id="${result.id}" class="card-panel hoverable blue lighten-2 white-text">${info.name}</p></a>
+                `
+            })
+            likedComponent.innerHTML = component
+            return
+        }
+        likedComponent.innerHTML = "<h3 class='center-align white-text'>nothing liked</h3>"
     }
 
     const competitionsList = async () => {
@@ -30,6 +63,26 @@ const main = () => {
         const results = await ballData.competitions()
         const leagues = results.filter(league => league.id === 2001 || league.id === 2002 || league.id === 2003 || league.id === 2021 || league.id === 2014 || league.id === 2015)
         renderResultComp(leagues)
+        document.querySelector('#liked-league').addEventListener('click', e => {
+            let page = e.target.parentNode.getAttribute("href").substr(1)
+            pageLoaded(page)
+            setTimeout(async function(){
+                const likeds = await getLiked()
+                const likedComponent = document.querySelector('.list-liked')
+                if(likeds.length > 0){
+                    let component = ''
+                    likeds.forEach(result => {
+                        let info = result.slice(-1)[0] 
+                        component += `
+                            <a href="#matches"><p id="${result.id}" class="card-panel hoverable blue lighten-2 white-text">${info.name}</p></a>
+                        `
+                    })
+                    likedComponent.innerHTML = component
+                    return
+                }
+                likedComponent.innerHTML = "<h3 class='center-align white-text'>nothing liked</h3>"
+            }, 500);
+        })
     }
 
     const matchesLists = async id => {
@@ -74,6 +127,11 @@ const main = () => {
                 let page = e.target.getAttribute('href').substr(1)
                 pageLoaded(page)
             })
+        })
+        document.querySelector('#liked').addEventListener('click', () => {
+            let standing = results.standings[0].table
+            standing.push(results.competition)
+            addLiked(standing)
         })
     }
 
@@ -196,10 +254,8 @@ const main = () => {
                     </div>
                 `
                 document.querySelector('.matches-list').innerHTML = component
-            });
+            })
 
-            const compItem = document.querySelectorAll('.competition-item')
-            detailComp(compItem)
             return
         }
         document.querySelector('.matches-list').innerHTML = "<h3 class='center-align white-text'>no matches</h3>"
@@ -213,7 +269,6 @@ const main = () => {
         competitionsList()
     }else{
         pageLoaded(page)
-        competitionsList()
     }
 
     function utcDateConv(times){

@@ -8,9 +8,6 @@ import mainView from "./script/view/main.js"
 
 document.addEventListener("DOMContentLoaded", mainView)
 
-// String(date(times)).substr(16, 5)
-// String(date(times)).substr(0,16)
-
 // if ('serviceWorker' in navigator) {
 //     const registration = runtime.register()
 
