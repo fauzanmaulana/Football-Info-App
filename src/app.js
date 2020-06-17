@@ -8,7 +8,7 @@ import mainView from "./script/view/main.js"
 
 document.addEventListener("DOMContentLoaded", mainView)
 
-// if ('serviceWorker' in navigator) {
+// if('serviceWorker' in navigator) {
 //     const registration = runtime.register()
 
 //     registerEvents(registration, {

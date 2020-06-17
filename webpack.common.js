@@ -42,6 +42,11 @@ module.exports = {
             filename: "liked.html"
         }),
 
+        new HtmlWebpackPlugin({
+            template: "./src/pages/likedDetail.html",
+            filename: "likedDetail.html"
+        }),
+
         new ServiceWorkerWebpackPlugin({
             entry: path.join(__dirname, 'src/sw.js'),
         })

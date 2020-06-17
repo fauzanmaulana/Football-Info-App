@@ -1,4 +1,6 @@
 import "../component/competition-list.js"
+import "../component/standing-list.js"
+import "../component/match-list.js"
 import "../component/nav-bar.js"
 import indexdb from "../../db.js"
 import ballData from "../data/football.js"
@@ -10,7 +12,7 @@ const main = () => {
         .then(response => response.text())
     }
 
-    const pageLoaded = async url => {
+    const pageLoaded = async (url) => {
         const thisPage = await loadPage(url)
         document.querySelector('#content').innerHTML = thisPage
     }
@@ -38,13 +40,50 @@ const main = () => {
             likeds.forEach(result => {
                 let info = result.slice(-1)[0] 
                 component += `
-                    <a href="#matches"><p id="${result.id}" class="card-panel hoverable blue lighten-2 white-text">${info.name}</p></a>
+                    <a href="#likedDetail"><p id="${result.id}" class="card-panel hoverable blue lighten-2 white-text likeds">${info.name}</p></a>
                 `
             })
             likedComponent.innerHTML = component
-            return
+        }else{
+            likedComponent.innerHTML = "<h3 class='center-align white-text'>nothing liked</h3>"
         }
-        likedComponent.innerHTML = "<h3 class='center-align white-text'>nothing liked</h3>"
+
+        document.querySelector('.btn-home').addEventListener('click', function(){
+            page = this.getAttribute('href').substr(1)
+            pageLoaded(page).then(() => {
+                competitionsList()
+            })
+        })
+
+        document.querySelectorAll('.likeds').forEach(like => {
+            like.addEventListener('click', function(){
+                page = this.parentNode.getAttribute('href').substr(1)
+                pageLoaded(page).then(() => {
+                    likedByIdList(Number(this.id))
+                })
+            })
+        })
+    }
+
+    const getLikedById = async id => {
+        const dbPromise = await indexdb()
+        const tx = dbPromise.transaction("liked", "readonly")
+        const store = tx.objectStore('liked')
+        return store.get(id)
+    }
+
+    const likedByIdList = async id => {
+        const likedByid = await getLikedById(id)
+        document.querySelector('.title-competition').innerText = `${likedByid.slice(-1)[0].name}`
+        document.querySelector('.back-liked-list').addEventListener('click', function(){
+            let page = this.getAttribute("href").substr(1)
+            pageLoaded(page).then(() => {
+                likedList()
+            })
+        })
+
+        const itList = document.querySelector('standing-list')
+        itList.standings = likedByid
     }
 
     const competitionsList = async () => {
@@ -65,23 +104,9 @@ const main = () => {
         renderResultComp(leagues)
         document.querySelector('#liked-league').addEventListener('click', e => {
             let page = e.target.parentNode.getAttribute("href").substr(1)
-            pageLoaded(page)
-            setTimeout(async function(){
-                const likeds = await getLiked()
-                const likedComponent = document.querySelector('.list-liked')
-                if(likeds.length > 0){
-                    let component = ''
-                    likeds.forEach(result => {
-                        let info = result.slice(-1)[0] 
-                        component += `
-                            <a href="#matches"><p id="${result.id}" class="card-panel hoverable blue lighten-2 white-text">${info.name}</p></a>
-                        `
-                    })
-                    likedComponent.innerHTML = component
-                    return
-                }
-                likedComponent.innerHTML = "<h3 class='center-align white-text'>nothing liked</h3>"
-            }, 500);
+            pageLoaded(page).then(() => {
+                likedList()
+            })
         })
     }
 
@@ -90,13 +115,15 @@ const main = () => {
         const matches = results.matches
         const navBar = document.querySelector('nav-bar')
         navBar.leagueName = results.competition.name
-        renderResultListMatch(matches)
+        const mcList = document.querySelector('match-list')
+        mcList.matchs = matches
         const tabLink = document.querySelectorAll('.tab-link')
         const backBtn = document.querySelector('.btn-home')
         backBtn.addEventListener('click', function(){
             let page = this.getAttribute('href').substr(1)
-            competitionsList()
-            pageLoaded(page)
+            pageLoaded(page).then(() => {
+                competitionsList()
+            })
         })
         console.log(tabLink)
         tabLink.forEach(tab => {
@@ -112,13 +139,15 @@ const main = () => {
         const results = await ballData.standings(id)
         const navBar = document.querySelector('nav-bar')
         navBar.leagueName = results.competition.name
-        renderResultListStandings(results.standings[0].table)
+        const stList = document.querySelector('standing-list')
+        stList.standings = results.standings[0].table
         const tabLink = document.querySelectorAll('.tab-link')
         const backBtn = document.querySelector('.btn-home')
         backBtn.addEventListener('click', function(){
             let page = this.getAttribute('href').substr(1)
-            competitionsList()
-            pageLoaded(page)
+            pageLoaded(page).then(() => {
+                competitionsList()
+            })
         })
         console.log(tabLink)
         tabLink.forEach(tab => {
@@ -132,6 +161,7 @@ const main = () => {
             let standing = results.standings[0].table
             standing.push(results.competition)
             addLiked(standing)
+            M.toast({html: 'liked success!, go liked standings at home page to check it!', classes: 'rounded'})
         })
     }
 
@@ -139,8 +169,9 @@ const main = () => {
         items.forEach(item => {
             item.addEventListener('click', e => {
                 let page = e.target.parentNode.getAttribute("href").substr(1)
-                matchesLists(e.target.id)
-                pageLoaded(page)
+                pageLoaded(page).then(() => {
+                    matchesLists(e.target.id)
+                })
             })
         })
     }
@@ -154,130 +185,15 @@ const main = () => {
         detailComp(compItem)
     }
 
-    const renderResultListStandings = results => {
-        if(results.length > 0){
-            let component = ''
-            results.forEach(result => {
-                console.log(result)
-                component += `
-                    <div class="card-panel blue lighten-2 white-text">
-                        <div class="row">
-                            <div class="container">
-                                <div class="col s12">
-                                    <div class="team-standings" style="display: flex; align-items: center; justify-content: space-between;">
-                                        <img src="${result.team.crestUrl}" alt="team" width="40">
-                                        <h6><b>${result.team.name}</b></h6>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row center-align">
-                            <div class="col s2">
-                                <p>M</p>
-                            </div>
-                            <div class="col s2">
-                                <p>M</p>
-                            </div>
-                            <div class="col s2">
-                                <p>S</p>
-                            </div>
-                            <div class="col s2">
-                                <p>K</p>
-                            </div>
-                            <div class="col s2">
-                                <p>GM</p>
-                            </div>
-                            <div class="col s2">
-                                <p>POINT</p>
-                            </div>
-                        </div>
-                        <div class="row center-align">
-                            <div class="col s2">
-                                <p>${result.playedGames}</p>
-                            </div>
-                            <div class="col s2">
-                                <p>${result.won}</p>
-                            </div>
-                            <div class="col s2">
-                                <p>${result.lost}</p>
-                            </div>
-                            <div class="col s2">
-                                <p>${result.draw}</p>
-                            </div>
-                            <div class="col s2">
-                                <p>${result.goalsFor}</p>
-                            </div>
-                            <div class="col s2">
-                                <p>${result.points}</p>
-                            </div>
-                        </div>
-                    </div>
-                `
-                document.querySelector('.standings-list').innerHTML = component
-            })
-            return
-        }
-        document.querySelector('.matches-list').innerHTML = "<h3 class='center-align white-text'>no standings</h3>"
-    }
-
-    const renderResultListMatch = results => {
-        if(results.length > 0){
-            let component = ''
-            results.forEach(result => {
-                if(result.score.winner === null){
-                    result.score.winner = 'belum tanding'
-                }
-                component += `
-                    <div class="card-panel blue lighten-2 white-text">
-                        <div class="row center-align">
-                            <div class="col s4">
-                                <h6>${result.awayTeam.name}</h6>
-                            </div>
-                            <div class="col s4">
-                                <h6>vs</h6>
-                            </div>
-                            <div class="col s4">
-                                <h6>${result.homeTeam.name}</h6>
-                            </div>
-                        </div>
-                        <div class="row center-align" style="margin: 0;">
-                            <div class="col s4">
-                                <p>${result.score.winner}</p>
-                            </div>
-                            <div class="col s4">
-                                <p>${String(utcDateConv(result.utcDate)).substr(16, 5)}</p>
-                            </div>
-                            <div class="col s4">
-                                <p>${String(utcDateConv(result.utcDate)).substr(0,16)}</p>
-                            </div>
-                        </div>
-                    </div>
-                `
-                document.querySelector('.matches-list').innerHTML = component
-            })
-
-            return
-        }
-        document.querySelector('.matches-list').innerHTML = "<h3 class='center-align white-text'>no matches</h3>"
-    }
-
     let page = window.location.hash.substr(1)
 
     if(page === ''){
         page = 'home'
-        pageLoaded(page)
-        competitionsList()
+        pageLoaded(page).then(() => {
+            competitionsList()
+        })
     }else{
         pageLoaded(page)
-    }
-
-    function utcDateConv(times){
-        let uctTime = times.replace(/-/g, ",")
-        let utc = uctTime.replace("T", ",")
-        let time = utc.replace(/:/g, ",")
-        let tm = time.substr(0, 19)
-        let t = tm.split(',')
-        return new Date(Date.UTC(t[0], t[1], t[2], t[3], t[4], t[5]))
     }
 }
 

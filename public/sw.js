@@ -4,7 +4,8 @@ var serviceWorkerOption = {
     "/index.html",
     "/matches.html",
     "/standings.html",
-    "/liked.html"
+    "/liked.html",
+    "/likedDetail.html"
   ]
 };
         
