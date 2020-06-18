@@ -2,76 +2,62 @@ const { assets } = global.serviceWorkerOption
 
 const CACHE_NAME = "tesv4"
 
-let assetsToCache = [
+const urlToCache = [
   ...assets,
-  './',
-  '/src/pages/home.html',
-  "/src/script/component/competition-list.js",
-  "/src/script/component/competition-item.js",
-  "/src/script/data/football.js",
+  "./",
+  "/src/pages/home.html",
+  "/src/pages/matches.html",
+  "/src/pages/standings.html",
+  "/src/pages/liked.html",
+  "/src/pages/likedDetail.html",
   "/src/assets/landing.png",
   "/src/assets/icon.png",
+  "/src/db.js",
   "/src/manifest.json",
 ]
 
-console.log(assetsToCache)
+const base_url = 'https://api.football-data.org/v2'
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      console.log('ini install sw')
-      return cache.addAll(assetsToCache)
-    })
-  )
-})
-
-self.addEventListener("fetch", function(event) {
-  const base_url = "https://api.football-data.org/"
-  if(event.request.url.indexOf(base_url) > -1){
-    event.respondWith(
       caches.open(CACHE_NAME).then(cache => {
-        return fetch(event.request).then(response => {
-          cache.put(event.request.url, response.clone())
-          return response
-        })
+          return cache.addAll(urlToCache)
       })
-    )
-  }else{
-    event.respondWith(
-      caches.match(event.request, { ignoreSearch: true }).then(function(response) {
-          return response || fetch (event.request)
-      })
-    )
-  }
+  )
 })
 
 self.addEventListener('fetch', event => {
-  event.respondWith(
-      caches
-      .match(event.request, { cacheName : CACHE_NAME })
-      .then(response => {
-          if (response) {
-          console.log("ServiceWorker: Gunakan aset dari cache: ", response.url);
-          return response;
-        }
- 
-        console.log("ServiceWorker: Memuat aset dari server: ", event.request.url);
-        return fetch(event.request);
-      })
-  )
+  if (event.request.url.indexOf(base_url) > -1){
+      event.respondWith(
+          (async () => {
+              const cache = await caches.open(CACHE_NAME)
+              const res = await fetch(event.request)
+              cache.put(event.request.url, res.clone())
+              return res
+          })()
+      )
+  } else {
+      event.respondWith(
+          (async () => {
+              return await caches.match(event.request.url, {
+                  ignoreSearch: true
+              }) || await fetch(event.request)
+          })()
+      )
+  }
 })
 
 self.addEventListener('activate', event => {
-  event.waitUntil(
-      caches.keys().then(cacheNames => {
-          return Promise.all(
-              cacheNames.map(cacheName => {
-                  if (cacheName != CACHE_NAME) {
-                      console.log("ServiceWorker: cache " + cacheName + " dihapus");
-                      return caches.delete(cacheName);
-                  }
-              })
-          )
-      })
-  )
+    event.waitUntil(
+        caches.keys().then( cacheNames => {
+            return Promise.all(
+                cacheNames.map( cacheName => {
+                    if (cacheName !== CACHE_NAME) {
+                        console.log(`cache ${cacheName} dihapus`)
+                        return caches.delete(cacheName)
+                    }
+                })
+            )
+        })
+    )
 })

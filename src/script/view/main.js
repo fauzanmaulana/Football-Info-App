@@ -8,7 +8,7 @@ import ballData from "../data/football.js"
 const main = () => {
 
     const loadPage = page => {
-        return fetch(`src/pages/${page}.html`, {mode: 'no-cors'})
+        return fetch(`src/pages/${page}.html`)
         .then(response => response.text())
     }
 
@@ -90,11 +90,18 @@ const main = () => {
         if('caches' in window){
             caches.match('https://api.football-data.org/v2/competitions').then(response => {
                 if(response){
+                    console.log(response)
                     response.json().then(results => {
                         const result = results.competitions
                         const league = result.filter(league => league.id === 2001 || league.id === 2002 || league.id === 2003 || league.id === 2021 || league.id === 2014 || league.id === 2015)
                         console.log('menggunakan cache')
                         renderResultComp(league)
+                        document.querySelector('#liked-league').addEventListener('click', e => {
+                            let page = e.target.parentNode.getAttribute("href").substr(1)
+                            pageLoaded(page).then(() => {
+                                likedList()
+                            })
+                        })
                     })
                 }
             })
@@ -111,6 +118,37 @@ const main = () => {
     }
 
     const matchesLists = async id => {
+        if('caches' in window){
+            caches.match(`https://api.football-data.org/v2/competitions/${id}/matches?status=SCHEDULED`).then(response => {
+                if(response){
+                    console.log(response)
+                    response.json().then(results => {
+                        const matches = results.matches
+                        const navBar = document.querySelector('nav-bar')
+                        navBar.leagueName = results.competition.name
+                        const mcList = document.querySelector('match-list')
+                        mcList.matchs = matches
+                        const tabLink = document.querySelectorAll('.tab-link')
+                        const backBtn = document.querySelector('.btn-home')
+                        backBtn.addEventListener('click', function(){
+                            let page = this.getAttribute('href').substr(1)
+                            pageLoaded(page).then(() => {
+                                competitionsList()
+                            })
+                        })
+                        console.log(tabLink)
+                        tabLink.forEach(tab => {
+                            tab.addEventListener('click', e => {
+                                let page = e.target.getAttribute('href').substr(1)
+                                pageLoaded(page).then(() => {
+                                    standingsList(id)
+                                })
+                            })
+                        })
+                    })
+                }
+            })
+        }
         const results = await ballData.matches(id)
         const matches = results.matches
         const navBar = document.querySelector('nav-bar')
@@ -128,14 +166,52 @@ const main = () => {
         console.log(tabLink)
         tabLink.forEach(tab => {
             tab.addEventListener('click', e => {
-                standingsList(id)
                 let page = e.target.getAttribute('href').substr(1)
-                pageLoaded(page)
+                pageLoaded(page).then(() => {
+                    standingsList(id)
+                })
             })
         })
     }
 
     const standingsList = async id => {
+        if('caches' in window){
+            caches.match(`https://api.football-data.org/v2/competitions/${id}/standings`).then(response => {
+                if(response){
+                    console.log(response)
+                    response.json().then(results => {
+                        console.log('ini result dari standing')
+                        const navBar = document.querySelector('nav-bar')
+                        navBar.leagueName = results.competition.name
+                        const stList = document.querySelector('standing-list')
+                        stList.standings = results.standings[0].table
+                        const tabLink = document.querySelectorAll('.tab-link')
+                        const backBtn = document.querySelector('.btn-home')
+                        backBtn.addEventListener('click', function(){
+                            let page = this.getAttribute('href').substr(1)
+                            pageLoaded(page).then(() => {
+                                competitionsList()
+                            })
+                        })
+                        console.log(tabLink)
+                        tabLink.forEach(tab => {
+                            tab.addEventListener('click', e => {
+                                let page = e.target.getAttribute('href').substr(1)
+                                pageLoaded(page).then(() => {
+                                    matchesLists(id)
+                                })
+                            })
+                        })
+                        document.querySelector('#liked').addEventListener('click', () => {
+                            let standing = results.standings[0].table
+                            standing.push(results.competition)
+                            addLiked(standing)
+                            M.toast({html: 'liked success!, go liked standings at home page to check it!', classes: 'rounded'})
+                        })
+                    })
+                }
+            })
+        }
         const results = await ballData.standings(id)
         const navBar = document.querySelector('nav-bar')
         navBar.leagueName = results.competition.name
@@ -152,9 +228,10 @@ const main = () => {
         console.log(tabLink)
         tabLink.forEach(tab => {
             tab.addEventListener('click', e => {
-                matchesLists(id)
                 let page = e.target.getAttribute('href').substr(1)
-                pageLoaded(page)
+                pageLoaded(page).then(() => {
+                    matchesLists(id)
+                })
             })
         })
         document.querySelector('#liked').addEventListener('click', () => {
@@ -177,7 +254,6 @@ const main = () => {
     }
 
     const renderResultComp = result => {
-        console.log(result)
         const compList = document.querySelector('competition-list')
         compList.competitions = result
 
@@ -187,13 +263,11 @@ const main = () => {
 
     let page = window.location.hash.substr(1)
 
-    if(page === ''){
+    if(page === '' || page === 'home'){
         page = 'home'
         pageLoaded(page).then(() => {
             competitionsList()
         })
-    }else{
-        pageLoaded(page)
     }
 }
 

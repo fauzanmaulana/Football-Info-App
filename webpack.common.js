@@ -1,6 +1,6 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-const path = require('path')
-const ServiceWorkerWebpackPlugin = require('serviceworker-webpack-plugin')
+var HtmlWebpackPlugin = require('html-webpack-plugin')
+var path = require('path')
+var ServiceWorkerWepbackPlugin = require('serviceworker-webpack-plugin')
 
 module.exports = {
     entry : {
@@ -26,6 +26,11 @@ module.exports = {
             template: "./src/template.html",
             filename: "index.html"
         }),
+
+        new HtmlWebpackPlugin({
+            template: "./src/pages/home.html",
+            filename: "home.html"
+        }),
         
         new HtmlWebpackPlugin({
             template: "./src/pages/matches.html",
@@ -47,8 +52,8 @@ module.exports = {
             filename: "likedDetail.html"
         }),
 
-        new ServiceWorkerWebpackPlugin({
+        new ServiceWorkerWepbackPlugin({
             entry: path.join(__dirname, 'src/sw.js'),
-        })
+        }),
     ]
 }
