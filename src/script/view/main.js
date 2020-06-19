@@ -149,29 +149,47 @@ const main = () => {
                 }
             })
         }
-        const results = await ballData.matches(id)
-        const matches = results.matches
-        const navBar = document.querySelector('nav-bar')
-        navBar.leagueName = results.competition.name
-        const mcList = document.querySelector('match-list')
-        mcList.matchs = matches
-        const tabLink = document.querySelectorAll('.tab-link')
-        const backBtn = document.querySelector('.btn-home')
-        backBtn.addEventListener('click', function(){
-            let page = this.getAttribute('href').substr(1)
-            pageLoaded(page).then(() => {
-                competitionsList()
-            })
-        })
-        console.log(tabLink)
-        tabLink.forEach(tab => {
-            tab.addEventListener('click', e => {
-                let page = e.target.getAttribute('href').substr(1)
+        try{
+            const results = await ballData.matches(id)
+            const matches = results.matches
+            const navBar = document.querySelector('nav-bar')
+            navBar.leagueName = results.competition.name
+            const mcList = document.querySelector('match-list')
+            mcList.matchs = matches
+            const tabLink = document.querySelectorAll('.tab-link')
+            const backBtn = document.querySelector('.btn-home')
+            backBtn.addEventListener('click', function(){
+                let page = this.getAttribute('href').substr(1)
                 pageLoaded(page).then(() => {
-                    standingsList(id)
+                    competitionsList()
                 })
             })
-        })
+            tabLink.forEach(tab => {
+                tab.addEventListener('click', e => {
+                    let page = e.target.getAttribute('href').substr(1)
+                    pageLoaded(page).then(() => {
+                        standingsList(id)
+                    })
+                })
+            })
+        }catch(er){
+            const tabLink = document.querySelectorAll('.tab-link')
+            const backBtn = document.querySelector('.btn-home')
+            backBtn.addEventListener('click', function(){
+                let page = this.getAttribute('href').substr(1)
+                pageLoaded(page).then(() => {
+                    competitionsList()
+                })
+            })
+            tabLink.forEach(tab => {
+                tab.addEventListener('click', e => {
+                    let page = e.target.getAttribute('href').substr(1)
+                    pageLoaded(page).then(() => {
+                        standingsList(id)
+                    })
+                })
+            })
+        }
     }
 
     const standingsList = async id => {
@@ -225,7 +243,6 @@ const main = () => {
                 competitionsList()
             })
         })
-        console.log(tabLink)
         tabLink.forEach(tab => {
             tab.addEventListener('click', e => {
                 let page = e.target.getAttribute('href').substr(1)
