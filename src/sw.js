@@ -11,12 +11,15 @@ const urlToCache = [
   "/src/pages/liked.html",
   "/src/pages/likedDetail.html",
   "/src/assets/landing.png",
-  "/src/assets/icon.png",
+  "/src/assets/icon.svg",
+  "/src/assets/like.png",
+  "/src/assets/trash.png",
   "/src/db.js",
   "/src/manifest.json",
 ]
 
 const base_url = 'https://api.football-data.org/v2'
+const base_url_img = 'https://upload.wikimedia.org/wikipedia'
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -27,7 +30,7 @@ self.addEventListener('install', event => {
 })
 
 self.addEventListener('fetch', event => {
-  if (event.request.url.indexOf(base_url) > -1){
+  if (event.request.url.indexOf(base_url) > -1|| event.request.url.indexOf(base_url_img) > -1){
       event.respondWith(
           (async () => {
               const cache = await caches.open(CACHE_NAME)

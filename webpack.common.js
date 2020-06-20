@@ -1,6 +1,6 @@
-var HtmlWebpackPlugin = require('html-webpack-plugin')
-var path = require('path')
-var ServiceWorkerWepbackPlugin = require('serviceworker-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const path = require('path')
+const ServiceWorkerWepbackPlugin = require('serviceworker-webpack-plugin')
 
 module.exports = {
     entry : {

@@ -17,12 +17,22 @@ const main = () => {
         document.querySelector('#content').innerHTML = thisPage
     }
 
-    const addLiked = async data => {
+    const addLiked = async (data, id, name) => {
         const dbPromise = await indexdb()
-        const tx = dbPromise.transaction('liked', 'readwrite')
+        const tx = dbPromise.transaction("liked", "readonly")
         const store = tx.objectStore('liked')
-        store.add(data)
-        return tx.complete
+        const checkId = store.get(id)
+        checkId.then(result => {
+            if(result !== undefined){
+                M.toast({html: 'your has been like this standing', classes: 'rounded'})
+            }else{
+                const tx = dbPromise.transaction('liked', 'readwrite')
+                const store = tx.objectStore('liked')
+                store.add(data)
+                M.toast({html: `your like ${name}!, go liked standings at home page to check it!`, classes: 'rounded'})
+                return tx.complete
+            }
+        })
     }
 
     const getLiked = async () => {
@@ -33,14 +43,13 @@ const main = () => {
     }
 
     const likedList = async () => {
-        const likeds = await getLiked()
+        const likes = await getLiked()
         const likedComponent = document.querySelector('.list-liked')
-        if(likeds.length > 0){
+        if(likes.length > 0){
             let component = ''
-            likeds.forEach(result => {
-                let info = result.slice(-1)[0] 
+            likes.forEach(result => {
                 component += `
-                    <a href="#likedDetail"><p id="${result.id}" class="card-panel hoverable blue lighten-2 white-text likeds">${info.name}</p></a>
+                    <a href="#likedDetail"><p id="${result.id}" class="card-panel hoverable blue lighten-2 white-text likeds">${result.competition.name}</p></a>
                 `
             })
             likedComponent.innerHTML = component
@@ -65,6 +74,21 @@ const main = () => {
         })
     }
 
+    const getDeleteLiked = async id => {
+        const dbPromise = await indexdb()
+        const tx = dbPromise.transaction("liked", "readwrite")
+        const store = tx.objectStore('liked')
+        return store.delete(id)
+    }
+
+    const deleteLiked = async id => {
+        const delLiked = await getDeleteLiked(id)
+        console.log(delLiked)
+        pageLoaded('liked').then(() => {
+            likedList()
+        })
+    }
+
     const getLikedById = async id => {
         const dbPromise = await indexdb()
         const tx = dbPromise.transaction("liked", "readonly")
@@ -74,7 +98,7 @@ const main = () => {
 
     const likedByIdList = async id => {
         const likedByid = await getLikedById(id)
-        document.querySelector('.title-competition').innerText = `${likedByid.slice(-1)[0].name}`
+        document.querySelector('.title-competition').innerText = `${likedByid.competition.name}`
         document.querySelector('.back-liked-list').addEventListener('click', function(){
             let page = this.getAttribute("href").substr(1)
             pageLoaded(page).then(() => {
@@ -82,8 +106,12 @@ const main = () => {
             })
         })
 
+        document.querySelector('#delete-liked').addEventListener('click', function(){
+            deleteLiked(id)
+        })
+
         const itList = document.querySelector('standing-list')
-        itList.standings = likedByid
+        itList.standings = likedByid.standing
     }
 
     const competitionsList = async () => {
@@ -224,7 +252,6 @@ const main = () => {
                             let standing = results.standings[0].table
                             standing.push(results.competition)
                             addLiked(standing)
-                            M.toast({html: 'liked success!, go liked standings at home page to check it!', classes: 'rounded'})
                         })
                     })
                 }
@@ -252,10 +279,9 @@ const main = () => {
             })
         })
         document.querySelector('#liked').addEventListener('click', () => {
-            let standing = results.standings[0].table
-            standing.push(results.competition)
-            addLiked(standing)
-            M.toast({html: 'liked success!, go liked standings at home page to check it!', classes: 'rounded'})
+            let standings = results.standings[0].table
+            const dataSt = {id: results.competition.id, standing: standings, competition: results.competition}
+            addLiked(dataSt, results.competition.id, results.competition.name)
         })
     }
 

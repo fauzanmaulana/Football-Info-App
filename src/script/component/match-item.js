@@ -10,15 +10,6 @@ class matchItem extends HTMLElement{
         this.isNoResult = message
     }
 
-    utcDateConv(times){
-        let uctTime = times.replace(/-/g, ",")
-        let utc = uctTime.replace("T", ",")
-        let time = utc.replace(/:/g, ",")
-        let tm = time.substr(0, 19)
-        let t = tm.split(',')
-        return new Date(Date.UTC(t[0], t[1], t[2], t[3], t[4], t[5]))
-    }
-
     render(){
         if(this.isNoResult === ""){
             this.innerHTML = `
@@ -39,10 +30,10 @@ class matchItem extends HTMLElement{
                         <p>${this._match.score.winner}</p>
                     </div>
                     <div class="col s4">
-                        <p>${String(this.utcDateConv(this._match.utcDate)).substr(16, 5)}</p>
+                        <p>${new Date(this._match.utcDate).toLocaleTimeString('en-ID')}</p>
                     </div>
                     <div class="col s4">
-                        <p>${String(this.utcDateConv(this._match.utcDate)).substr(0,16)}</p>
+                        <p>${new Date(this._match.utcDate).toLocaleDateString('en-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     </div>
                 </div>
             </div>

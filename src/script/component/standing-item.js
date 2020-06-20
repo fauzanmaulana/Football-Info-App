@@ -12,7 +12,7 @@ class standingItem extends HTMLElement{
                 <div class="container">
                     <div class="col s12">
                         <div class="team-standings" style="display: flex; align-items: center; justify-content: space-between;">
-                            <img src="${this._standing.team.crestUrl}" alt="team" width="40">
+                            <img src="${this._standing.team.crestUrl.replace(/^http:\/\//i, 'https://')}" alt="team" width="40">
                             <h6><b>${this._standing.team.name}</b></h6>
                         </div>
                     </div>
