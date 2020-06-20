@@ -249,9 +249,9 @@ const main = () => {
                             })
                         })
                         document.querySelector('#liked').addEventListener('click', () => {
-                            let standing = results.standings[0].table
-                            standing.push(results.competition)
-                            addLiked(standing)
+                            let standings = results.standings[0].table
+                            const dataSt = {id: results.competition.id, standing: standings, competition: results.competition}
+                            addLiked(dataSt, results.competition.id, results.competition.name)
                         })
                     })
                 }
