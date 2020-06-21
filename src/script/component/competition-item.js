@@ -7,7 +7,7 @@ class CompItem extends HTMLElement{
 
     render(){
         this.innerHTML = `
-            <a href="#matches"><p id="${this._competition.id}" class="card-panel hoverable blue lighten-2 white-text">${this._competition.name}</p></a>
+            <a href="#matches?id=${this._competition.id}"><p id="${this._competition.id}" class="card-panel hoverable blue lighten-2 white-text">${this._competition.name}</p></a>
         `
     }
 }

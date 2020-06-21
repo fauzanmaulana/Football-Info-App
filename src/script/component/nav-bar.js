@@ -8,6 +8,12 @@ class Navbar extends HTMLElement{
         this.render()
     }
 
+    set leagueId(id){
+        this.id = id
+        console.log(`ini dari component navbar ${this.id}`)
+        this.render()
+    }
+
     render(){
         this.innerHTML = `
             <div class="navbar-fixed">
@@ -26,8 +32,8 @@ class Navbar extends HTMLElement{
                     </div>
                     <div class="nav-content">
                         <ul class="tabs tabs-transparent">
-                            <li class="tab"><a href="#matches" class="tab-link">Matches</a></li>
-                            <li class="tab"><a href="#standings" class="tab-link">Standings</a></li>
+                            <li class="tab"><a href="#matches?id=${this.id}" class="tab-link">Matches</a></li>
+                            <li class="tab"><a href="#standings?id=${this.id}" class="tab-link">Standings</a></li>
                         </ul>
                     </div>
                 </nav>
